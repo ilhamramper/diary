@@ -23,57 +23,62 @@
 
     <title>Sparta Coding Club | Bootstrap Practice</title>
 
-    <link rel="preconnect" href="https://fonts.gstatic.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Jua&amp;display=swap" rel="stylesheet" />
-
-    <style></style>
-
     <script>
         $(document).ready(function () {
-            //alert('Fully loaded');
+            // alert('Fully loaded');
             listing();
             bsCustomFileInput.init();
         });
 
         function listing() {
             $.ajax({
-                type: 'GET',
-                url: '/diary',
+                type: "GET",
+                url: "/diary",
                 data: {},
                 success: function (response) {
-                    let articles = response['articles'];
+                    let articles = response["articles"];
                     for (let i = 0; i < articles.length; i++) {
-                        let title = articles[i]['title'];
-                        let content = articles[i]['content'];
-                        let file = articles[i]['file'];
+                        let title = articles[i]["title"];
+                        let content = articles[i]["content"];
+                        let file = articles[i]['file'] || 'default-image.jpg';
+                        let time = articles[i]['time'] || '????.??.??';
+
                         let profile = articles[i]['profile'];
+                        let profile_html = '';
+                        if (profile) {
+                            profile_html = `
+                    <img src="../static/${profile}" class="profile"/>
+                    `;
+                        }
+
                         let temp_html = `
-                        <div class="col-4">
-                            <div class="card">
-                                <img src="../${file}" class="card-img-top" alt="..." />
-                                <div class="card-body">
-                                    <img src="../${profile}" class="card-img-top" alt="..." style="height: 55px; width: 55px; border-radius: 50%;" />
-                                    <h5 class="card-title">${title}</h5>
-                                    <p class="card-text">${content}</p>
-                                    <h6 class="card-subtitle mb-2 text-muted">2022.02.15</h6>
-                                </div>
-                            </div>
-                        </div>
+            <div class="col-4">
+                <div class="card">
+                    <img src="../static/${file}"
+                        class="card-img-top" alt="...">
+                    <div class="card-body">
+                        ${profile_html}
+                        <h5 class="card-title">${title}</h5>
+                        <p class="card-text">${content}</p>
+                        <h6 class="card-subtitle mb-2 text-muted">${time}</h6>
+                    </div>
+                </div>
+            </div>
                         `;
-                        $('#cards-box').append(temp_html);
+                        $("#cards-box").append(temp_html);
                     }
-                }
+                },
             });
         }
 
         function posting() {
-            let title = $('#image-title').val();
+            let title = $("#image-title").val();
             if (!title) {
-                return alert('Hey user, you forgot a title');
+                return alert("Hey user, you forgot a title");
             }
-            let content = $('#image-description').val();
+            let content = $("#image-description").val();
             if (!content) {
-                return alert('Hey user, you forgot a description');
+                return alert("Hey user, you forgot a description");
             }
 
             let file = $("#image").prop("files")[0];
@@ -81,24 +86,32 @@
 
             let form_data = new FormData();
 
-            form_data.append('file_give', file);
-            form_data.append('profile_give', profile);
-            form_data.append('title_give', title);
-            form_data.append('content_give', content);
+            form_data.append("file_give", file);
+            form_data.append("profile_give", profile);
+            form_data.append("title_give", title);
+            form_data.append("content_give", content);
 
             $.ajax({
-                type: 'POST',
-                url: '/diary',
+                type: "POST",
+                url: "/diary",
                 data: form_data,
                 contentType: false,
                 processData: false,
                 success: function (response) {
                     console.log(response);
                     window.location.reload();
-                }
+                },
             });
         }
     </script>
+
+    <style>
+        .profile {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+        }
+    </style>
 </head>
 
 <body>
@@ -106,21 +119,26 @@
         <div class="p-5 mb-4 bg-light rounded-3">
             <div class="container-fluid py-5">
                 <h1 class="display-5 fw-bold">Personal Diary</h1>
-                <div class="mb-3 custom-file">
-                    <input class="form-control" type="file" id="image" />
+                <div class="input-group mb-3 custom-file">
+                    <input type="file" class="form-control" id="image" />
                 </div>
-                <div class="mb-3 custom-file">
-                    <input class="form-control" type="file" id="profile" />
+                <div class="input-group mb-3 custom-file">
+                    <input type="file" class="form-control" id="profile" />
                 </div>
-                <div class="mb-3">
-                    <input type="text" class="form-control" id="image-title" placeholder="The title of your image" />
+
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Image title goes here" aria-label="image title"
+                        aria-describedby="basic-addon1" id="image-title" />
                 </div>
-                <div class="mb-3">
-                    <textarea placeholder="The description of your image" class="form-control" id="image-description"
-                        rows="3"></textarea>
+
+                <div class="input-group">
+                    <textarea placeholder="Type in image description here" class="form-control"
+                        aria-label="image description" id="image-description"></textarea>
                 </div>
-                <button onclick="posting()" type="button" class="btn btn-primary">Save</button>
             </div>
+            <button onclick="posting()" class="btn btn-primary btn-lg" type="button">
+                Save
+            </button>
         </div>
         <div class="row justify-content-start" id="cards-box"></div>
     </div>
